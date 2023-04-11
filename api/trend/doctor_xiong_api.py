@@ -25,8 +25,10 @@ def get_fund_detail(fund_code: str, start_date: str, end_date: str):
     except requests.exceptions.Timeout:
         return None
     if response.status_code != 200:
+        print('invoke api failed: ' + str(response.status_code) + ', ' + response.text)
         return None
     api_response = loads(response.text, formatter=format_camel_to_snake, cls=ApiResponse)
     if api_response.code[0] != 200:
+        print('invoke api failed: ' + json.dumps(api_response))
         return None
     return api_response.get_fund_detail()
