@@ -2,19 +2,18 @@ from utils.json_utils import *
 import json
 
 
-class ApiResponse(object):
-    def __init__(self, code: int, message: str, data, trace_id):
+class DoctorXiongApiResponse(object):
+    def __init__(self, code: int, message: str, **kwargs):
         self.code = code,
         self.message = message
-        self.data = data
-        self.trace_id = trace_id
+        self.data = kwargs.get('data', None)
 
     def get_fund_detail(self):
         data = self.data[0]
-        return FundDetail(data)
+        return DoctorXiongFundDetail(data)
 
 
-class FundDetail(object):
+class DoctorXiongFundDetail(object):
     def __init__(self, data):
         """
         :param data: dict, may be in the following fields
@@ -80,11 +79,11 @@ class FundDetail(object):
             return None
         net_worth_data_list = []
         for data in self.net_worth_data:
-            net_worth_data_list.append(NetWorthData(data))
+            net_worth_data_list.append(DoctorXiongNetWorthData(data))
         return net_worth_data_list
 
 
-class NetWorthData(object):
+class DoctorXiongNetWorthData(object):
     def __init__(self, net_worth_data_array):
         self.date = net_worth_data_array[0]
         self.net_worth = net_worth_data_array[1]
