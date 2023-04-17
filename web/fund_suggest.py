@@ -83,7 +83,7 @@ def draw_chart(fund_name, fund_code, start_date, end_date, fund_daily_net_worth_
     print('last of date is ' + fund_daily_net_worth_list[-1].date + ', last of net worth is ' + str(
         fund_daily_net_worth_list[-1].net_worth))
     plt.figure(figsize=(15, 10))
-    plt.rcParams['font.sans-serif'] = ['Songti SC']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     plt.title(fund_name + ' - ' + fund_code + ' - ' + start_date + ' - ' + end_date)
     plt.xlabel('日期')
@@ -101,6 +101,8 @@ def draw_chart(fund_name, fund_code, start_date, end_date, fund_daily_net_worth_
     plt.legend()
     # x_ticks是密度比x更小的数组
     x_ticks = [x[i] for i in range(len(x)) if i % 10 == 0]
+    if x[-1] not in x_ticks:
+        x_ticks.append(x[-1])
     plt.xticks(x_ticks, rotation=45)
     plt.grid()
     # return base64 of chart png, zip it to reduce size, file name is fund_name.png
@@ -138,5 +140,5 @@ if __name__ == '__main__':
     fund_twenty_days_moving_average_line = calculate_moving_average_line(fund_daily_net_worth_list, 20)
 
     chart_base64 = draw_chart(fund_name, "008585", "2023-01-01", "2023-04-17", fund_daily_net_worth_list,
-                       fund_ten_days_moving_average_line, fund_twenty_days_moving_average_line)
+                              fund_ten_days_moving_average_line, fund_twenty_days_moving_average_line)
     print(chart_base64)
