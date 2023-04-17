@@ -34,7 +34,7 @@ class FundDailyNetWorth(object):
 #         self.chart_base64 = chart_base64
 
 
-def get_fund_detail(fund_code, start_date, end_date) -> (str, str, list):
+def get_fund_detail(fund_code, start_date, end_date, today_net_worth) -> (str, str, list):
     """
     get fund details
     :param fund_code: fund code
@@ -51,7 +51,10 @@ def get_fund_detail(fund_code, start_date, end_date) -> (str, str, list):
     # convert fund_daily_net_worth_list to a list of FundDailyNetWorth from DoctorXiongNetWorthData
     fund_daily_net_worth_list = [FundDailyNetWorth(net_worth_data[0], net_worth_data[1]) for net_worth_data in
                                  result.net_worth_data]
-    return fund_name, fund_daily_net_worth_list
+    # if last of fund_daily_net_worth_list is not today, add today's net worth
+    if fund_daily_net_worth_list[-1].date != end_date:
+        fund_daily_net_worth_list.append(FundDailyNetWorth(end_date, today_net_worth))
+    return None, fund_name, fund_daily_net_worth_list
 
 
 def calculate_moving_average_line(fund_daily_net_worth_list, avg_days) -> list:
@@ -77,8 +80,10 @@ def calculate_moving_average_line(fund_daily_net_worth_list, avg_days) -> list:
 
 def draw_chart(fund_name, fund_code, start_date, end_date, fund_daily_net_worth_list, fund_ten_days_avg_net_worth_list,
                fund_twenty_days_avg_net_worth_list):
+    print('last of date is ' + fund_daily_net_worth_list[-1].date + ', last of net worth is ' + str(
+        fund_daily_net_worth_list[-1].net_worth))
     plt.figure(figsize=(15, 10))
-    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['font.sans-serif'] = ['Songti SC']
     plt.rcParams['axes.unicode_minus'] = False
     plt.title(fund_name + ' - ' + fund_code + ' - ' + start_date + ' - ' + end_date)
     plt.xlabel('日期')
@@ -98,9 +103,9 @@ def draw_chart(fund_name, fund_code, start_date, end_date, fund_daily_net_worth_
     x_ticks = [x[i] for i in range(len(x)) if i % 10 == 0]
     plt.xticks(x_ticks, rotation=45)
     plt.grid()
-    # return base64 of chart png, 并压缩图片
+    # return base64 of chart png, zip it to reduce size, file name is fund_name.png
     buf = io.BytesIO()
-    plt.savefig(buf, format='png')
+    plt.savefig(buf, format='png', dpi=100)
     buf.seek(0)
     chart_base64 = base64.b64encode(buf.read())
     buf.close()
@@ -128,10 +133,10 @@ def calculate_suggest(fund_daily_net_worth_list, fund_ten_days_avg_net_worth_lis
 
 
 if __name__ == '__main__':
-    error_message, fund_name, fund_daily_net_worth_list = get_fund_detail("008585", "2023-01-01", "2023-04-16")
+    error_message, fund_name, fund_daily_net_worth_list = get_fund_detail("008585", "2023-01-01", "2023-04-16", 1)
     fund_ten_days_moving_average_line = calculate_moving_average_line(fund_daily_net_worth_list, 10)
     fund_twenty_days_moving_average_line = calculate_moving_average_line(fund_daily_net_worth_list, 20)
 
-    chart_base64 = draw_chart(fund_name, "008585", "2023-01-01", "2023-04-16", fund_daily_net_worth_list,
+    chart_base64 = draw_chart(fund_name, "008585", "2023-01-01", "2023-04-17", fund_daily_net_worth_list,
                        fund_ten_days_moving_average_line, fund_twenty_days_moving_average_line)
     print(chart_base64)

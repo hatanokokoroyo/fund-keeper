@@ -20,8 +20,11 @@ def get_fund_detail(fund_code: str, start_date: str, end_date: str):
         'startDate': start_date,
         'endDate': end_date
     }
+    headers = {
+        "token": ""
+    }
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, headers=headers, params=params, timeout=10)
     except requests.exceptions.Timeout:
         return None
     if response.status_code != 200:
@@ -31,3 +34,6 @@ def get_fund_detail(fund_code: str, start_date: str, end_date: str):
     if api_response.code[0] != 200:
         return api_response.message
     return api_response.get_fund_detail()
+
+
+# def get_today_net_worth(fund_code) -> float:

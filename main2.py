@@ -12,8 +12,8 @@ def read_root():
 
 # http://localhost:3000/suggest?fund_code=008585&start_date=2023-01-01&end_date=2023-04-16
 @app.get("/suggest")
-def suggest(fund_code: str, start_date: str, end_date: str):
-    error_message, fund_name, fund_daily_net_worth_list = get_fund_detail(fund_code, start_date, end_date)
+def suggest(fund_code: str, start_date: str, end_date: str, today_net_worth: float):
+    error_message, fund_name, fund_daily_net_worth_list = get_fund_detail(fund_code, start_date, end_date, today_net_worth)
     if error_message is not None:
         return {
             'error_message': error_message
