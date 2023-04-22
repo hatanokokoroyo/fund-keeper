@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import FastAPI
 
 from web.fund_suggest import *
@@ -13,7 +15,8 @@ def read_root():
 # http://localhost:3000/suggest?fund_code=008585&start_date=2023-01-01&end_date=2023-04-16
 @app.get("/suggest")
 def suggest(fund_code: str, start_date: str, end_date: str, today_net_worth: float):
-    error_message, fund_name, fund_daily_net_worth_list = get_fund_detail(fund_code, start_date, end_date, today_net_worth)
+    error_message, fund_name, fund_daily_net_worth_list = get_fund_detail(fund_code, start_date, end_date,
+                                                                          today_net_worth)
     if error_message is not None:
         return {
             'error_message': error_message
@@ -32,6 +35,22 @@ def suggest(fund_code: str, start_date: str, end_date: str, today_net_worth: flo
         # 'suggest_content': suggest_content,
         'chart_base64': chart_base64
     }
+
+
+@app.get("/get_one_year_net_worth")
+def get_one_year_net_worth(fund_code: str, real_time_net_worth: float = None):
+    """
+    get one year net worth
+    :param fund_code: fund code
+    :param real_time_net_worth: real_time_net_worth, if not None, use 1 as today's net worth
+    :return: base64 string of chart
+    """
+    today = datetime.datetime.now()
+    start_date = (today - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
+    end_date = today.strftime('%Y-%m-%d')
+    if real_time_net_worth is None:
+        real_time_net_worth = 1
+    return suggest(fund_code, start_date, end_date, real_time_net_worth)
 
 
 if __name__ == '__main__':
