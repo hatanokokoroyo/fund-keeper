@@ -45,14 +45,14 @@ def get_one_year_net_worth(fund_code: str, real_time_net_worth: float = None):
     :param real_time_net_worth: real_time_net_worth, if not None, use 1 as today's net worth
     :return: base64 string of chart
     """
-    today = datetime.datetime.now()
-    # end_date is latest date but not saturday or sunday
-    end_date = today.strftime('%Y-%m-%d')
-    if today.weekday() == 5:
-        end_date = (today - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-    elif today.weekday() == 6:
-        end_date = (today - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
-    start_date = (today - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
+    latest_day_not_weekend = datetime.datetime.now()
+    if latest_day_not_weekend.weekday() == 5:
+        latest_day_not_weekend = latest_day_not_weekend - datetime.timedelta(days=1)
+    elif latest_day_not_weekend.weekday() == 6:
+        latest_day_not_weekend = latest_day_not_weekend - datetime.timedelta(days=2)
+
+    end_date = latest_day_not_weekend.strftime('%Y-%m-%d')
+    start_date = (latest_day_not_weekend - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
 
     if real_time_net_worth is None:
         real_time_net_worth = 1
