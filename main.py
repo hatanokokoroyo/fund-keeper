@@ -33,7 +33,7 @@ def main():
         if not isinstance(fund_detail, DoctorXiongFundDetail):
             print('error')
             return
-        suggest(end_date, fund_detail, today_net_worth, name, fund_code)
+        suggest(start_date, end_date, fund_detail, today_net_worth, name, fund_code)
 
 
 def get_fund_real_time_net_worth(fund_code: str):
@@ -47,7 +47,7 @@ def get_fund_real_time_net_worth(fund_code: str):
     return name, float(real_time_net_worth)
 
 
-def suggest(end_date, fund_detail, today_net_worth, name, fund_code):
+def suggest(start_date, end_date, fund_detail, today_net_worth, name, fund_code):
     net_worth_data_list = fund_detail.get_net_worth_data_list()
     # 添加当日最新净值
     net_worth_data_list.append(DoctorXiongNetWorthData([end_date, today_net_worth, '', '']))
@@ -59,42 +59,46 @@ def suggest(end_date, fund_detail, today_net_worth, name, fund_code):
     daily_20_avg_net_worth = calculate_daily_avg_net_worth(net_worth_data_list, 20)
     daily_60_avg_net_worth = calculate_daily_avg_net_worth(net_worth_data_list, 60)
 
-    # 如果昨天的5日均线小于10日均线，且今天的5日均线大于10日均线，买入
-    if daily_5_avg_net_worth[-2] <= daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] > daily_10_avg_net_worth[
-        -1]:
-        over_net_worth = (daily_5_avg_net_worth[-1] - daily_10_avg_net_worth[-1])
-        over_percent = round(over_net_worth / daily_10_avg_net_worth[-1] * 100, 4)
-        print(name, fund_code, today_net_worth, "5日净值均线超出10日净值均线" + str(over_percent) + '%')
-        print(round(daily_5_avg_net_worth[-2], 4), round(daily_5_avg_net_worth[-1], 4))
-        print(round(daily_10_avg_net_worth[-2], 4), round(daily_10_avg_net_worth[-1], 4))
+    # 获取10和20日均线最后一个值中更高的那个
+    today_higher_avg_net_worth = max(daily_10_avg_net_worth[-1], daily_20_avg_net_worth[-1])
+    # 如果昨日净值小于today_higher_avg_net_worth，且今日净值大于today_higher_avg_net_worth，买入
+    yesterday_net_worth = float(net_worth_data_list[-2].net_worth)
+    if yesterday_net_worth < today_higher_avg_net_worth and today_net_worth > today_higher_avg_net_worth:
+        over_net_worth = (today_net_worth - today_higher_avg_net_worth)
+        over_percent = round(over_net_worth / today_higher_avg_net_worth * 100, 4)
+        print(name, fund_code, today_net_worth, "10日均值和20日均值中的较高值" + str(over_percent) + '%')
+        print(round(daily_10_avg_net_worth[-1], 4), round(daily_20_avg_net_worth[-1], 4))
         print('推荐买入\n')
-        # show_chart2(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
-        #             start_date, x, y)
-    # 如果三日内5日均线向下穿越10日均线，卖出
-    elif daily_5_avg_net_worth[-2] > daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] < daily_10_avg_net_worth[
-        -1]:
-        print(name, fund_code, today_net_worth)
-        print(round(daily_5_avg_net_worth[-2], 4), round(daily_5_avg_net_worth[-1], 4))
-        print(round(daily_10_avg_net_worth[-2], 4), round(daily_10_avg_net_worth[-1], 4))
+    # 如果昨日净值大于today_higher_avg_net_worth，且今日净值小于today_higher_avg_net_worth，卖出
+    elif yesterday_net_worth > today_higher_avg_net_worth and today_net_worth < today_higher_avg_net_worth:
+        over_net_worth = (today_higher_avg_net_worth - today_net_worth)
+        over_percent = round(over_net_worth / today_higher_avg_net_worth * 100, 4)
+        print(name, fund_code, today_net_worth, "10日均值和20日均值中的较高值" + str(over_percent) + '%')
+        print(round(daily_10_avg_net_worth[-1], 4), round(daily_20_avg_net_worth[-1], 4))
         print('推荐卖出\n')
-        # show_chart2(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
-        #             start_date, x, y)
-    elif daily_5_avg_net_worth[-1] > daily_10_avg_net_worth[-1]:
-        print(name, fund_code, today_net_worth)
+    # 如果今日净值大于today_higher_avg_net_worth, 继续持有
+    elif today_net_worth > today_higher_avg_net_worth:
+        over_net_worth = (today_net_worth - today_higher_avg_net_worth)
+        over_percent = round(over_net_worth / today_higher_avg_net_worth * 100, 4)
+        print(name, fund_code, today_net_worth, "10日均值和20日均值中的较高值" + str(over_percent) + '%')
+        print(round(daily_10_avg_net_worth[-1], 4), round(daily_20_avg_net_worth[-1], 4))
         print('推荐继续持有\n')
+        # show_chart(daily_5_avg_net_worth, daily_10_avg_net_worth, daily_20_avg_net_worth, daily_60_avg_net_worth,
+        #                end_date, fund_detail, start_date, x, y)
 
 
-def show_chart(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
+def show_chart(daily_5_avg_net_worth, daily_10_avg_net_worth, daily_20_avg_net_worth, daily_60_avg_net_worth, end_date,
+               fund_detail,
                start_date, x, y):
     plt.figure(figsize=(15, 10))
-    plt.rcParams['font.sans-serif'] = ['Songti SC']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     plt.title(fund_detail.name + ' - ' + fund_detail.code + ' - ' + start_date + ' - ' + end_date)
     plt.xlabel('日期')
     plt.ylabel('净值')
     plt.plot_date(x, y, '-', label='净值')
     # 打印daily_10_avg_net_worth, 并且标上名字
-    plt.plot_date(x, daily_5_avg_net_worth, '-', label='5日均线')
+    # plt.plot_date(x, daily_5_avg_net_worth, '-', label='5日均线')
     plt.plot_date(x, daily_10_avg_net_worth, '-', label='10日均线')
     # 打印daily_20_avg_net_worth, 并且标上名字
     plt.plot_date(x, daily_20_avg_net_worth, '-', label='20日均线')
