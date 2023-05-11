@@ -33,7 +33,7 @@ def main():
         if not isinstance(fund_detail, DoctorXiongFundDetail):
             print('error')
             return
-        show_chart(end_date, fund_detail, start_date, today_net_worth, name, fund_code)
+        suggest(end_date, fund_detail, today_net_worth, name, fund_code)
 
 
 def get_fund_real_time_net_worth(fund_code: str):
@@ -47,7 +47,7 @@ def get_fund_real_time_net_worth(fund_code: str):
     return name, float(real_time_net_worth)
 
 
-def show_chart(end_date, fund_detail, start_date, today_net_worth, name, fund_code):
+def suggest(end_date, fund_detail, today_net_worth, name, fund_code):
     net_worth_data_list = fund_detail.get_net_worth_data_list()
     # 添加当日最新净值
     net_worth_data_list.append(DoctorXiongNetWorthData([end_date, today_net_worth, '', '']))
@@ -58,19 +58,6 @@ def show_chart(end_date, fund_detail, start_date, today_net_worth, name, fund_co
     daily_10_avg_net_worth = calculate_daily_avg_net_worth(net_worth_data_list, 10)
     daily_20_avg_net_worth = calculate_daily_avg_net_worth(net_worth_data_list, 20)
     daily_60_avg_net_worth = calculate_daily_avg_net_worth(net_worth_data_list, 60)
-
-    # 如果三日内5日均线向上穿越10日均线，买入
-    # if daily_5_avg_net_worth[-2] < daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] > daily_10_avg_net_worth[-1]:
-    #     print('\n')
-    #     print(name, fund_code, today_net_worth)
-    #     print('推荐买入')
-    #     # plt.show()
-    # # 如果三日内5日均线向下穿越10日均线，卖出
-    # elif daily_5_avg_net_worth[-2] > daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] < daily_10_avg_net_worth[-1]:
-    #     print('\n')
-    #     print(name, fund_code, today_net_worth)
-    #     print('推荐卖出')
-    #     # plt.show()
 
     # 如果昨天的5日均线小于10日均线，且今天的5日均线大于10日均线，买入
     if daily_5_avg_net_worth[-2] <= daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] > daily_10_avg_net_worth[
@@ -97,8 +84,8 @@ def show_chart(end_date, fund_detail, start_date, today_net_worth, name, fund_co
         print('推荐继续持有\n')
 
 
-def show_chart2(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
-                start_date, x, y):
+def show_chart(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
+               start_date, x, y):
     plt.figure(figsize=(15, 10))
     plt.rcParams['font.sans-serif'] = ['Songti SC']
     plt.rcParams['axes.unicode_minus'] = False
