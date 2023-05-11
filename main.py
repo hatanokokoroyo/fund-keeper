@@ -75,19 +75,26 @@ def show_chart(end_date, fund_detail, start_date, today_net_worth, name, fund_co
     # 如果昨天的5日均线小于10日均线，且今天的5日均线大于10日均线，买入
     if daily_5_avg_net_worth[-2] <= daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] > daily_10_avg_net_worth[
         -1]:
-        print('\n')
-        print(name, fund_code, today_net_worth)
-        print('推荐买入')
+        over_net_worth = (daily_5_avg_net_worth[-1] - daily_10_avg_net_worth[-1])
+        over_percent = round(over_net_worth / daily_10_avg_net_worth[-1] * 100, 4)
+        print(name, fund_code, today_net_worth, "5日净值均线超出10日净值均线" + str(over_percent) + '%')
+        print(round(daily_5_avg_net_worth[-2], 4), round(daily_5_avg_net_worth[-1], 4))
+        print(round(daily_10_avg_net_worth[-2], 4), round(daily_10_avg_net_worth[-1], 4))
+        print('推荐买入\n')
         # show_chart2(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
         #             start_date, x, y)
     # 如果三日内5日均线向下穿越10日均线，卖出
-    elif daily_5_avg_net_worth[-3] > daily_10_avg_net_worth[-3] and daily_5_avg_net_worth[-1] < daily_10_avg_net_worth[
+    elif daily_5_avg_net_worth[-2] > daily_10_avg_net_worth[-2] and daily_5_avg_net_worth[-1] < daily_10_avg_net_worth[
         -1]:
-        print('\n')
         print(name, fund_code, today_net_worth)
-        print('推荐卖出')
+        print(round(daily_5_avg_net_worth[-2], 4), round(daily_5_avg_net_worth[-1], 4))
+        print(round(daily_10_avg_net_worth[-2], 4), round(daily_10_avg_net_worth[-1], 4))
+        print('推荐卖出\n')
         # show_chart2(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
         #             start_date, x, y)
+    elif daily_5_avg_net_worth[-1] > daily_10_avg_net_worth[-1]:
+        print(name, fund_code, today_net_worth)
+        print('推荐继续持有\n')
 
 
 def show_chart2(daily_10_avg_net_worth, daily_20_avg_net_worth, daily_5_avg_net_worth, end_date, fund_detail,
