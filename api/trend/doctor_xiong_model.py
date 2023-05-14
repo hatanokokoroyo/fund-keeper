@@ -86,6 +86,6 @@ class DoctorXiongFundDetail(object):
 class DoctorXiongNetWorthData(object):
     def __init__(self, net_worth_data_array):
         self.date = net_worth_data_array[0]
-        self.net_worth = net_worth_data_array[1]
+        self.net_worth = float(net_worth_data_array[1])
         self.growth = net_worth_data_array[2]
         self.dividend = net_worth_data_array[3]

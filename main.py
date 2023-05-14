@@ -63,6 +63,10 @@ def suggest(start_date, end_date, fund_detail, today_net_worth, name, fund_code)
     today_higher_avg_net_worth = max(daily_10_avg_net_worth[-1], daily_20_avg_net_worth[-1])
     # 如果昨日净值小于today_higher_avg_net_worth，且今日净值大于today_higher_avg_net_worth，买入
     yesterday_net_worth = float(net_worth_data_list[-2].net_worth)
+
+    show_chart(daily_5_avg_net_worth, daily_10_avg_net_worth, daily_20_avg_net_worth, daily_60_avg_net_worth,
+                   end_date, fund_detail, start_date, x, y)
+
     if yesterday_net_worth < today_higher_avg_net_worth and today_net_worth > today_higher_avg_net_worth:
         over_net_worth = (today_net_worth - today_higher_avg_net_worth)
         over_percent = round(over_net_worth / today_higher_avg_net_worth * 100, 4)

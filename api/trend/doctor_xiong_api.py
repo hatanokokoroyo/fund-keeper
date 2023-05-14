@@ -21,7 +21,7 @@ def get_fund_detail(fund_code: str, start_date: str, end_date: str):
         'endDate': end_date
     }
     headers = {
-        "token": ""
+        "token": "UPIYr4zGtH"
     }
     try:
         response = requests.get(url, headers=headers, params=params, timeout=10)
@@ -29,7 +29,7 @@ def get_fund_detail(fund_code: str, start_date: str, end_date: str):
         return None
     if response.status_code != 200:
         return None
-    print(response.text)
+    # print(response.text)
     api_response = loads(response.text, formatter=format_camel_to_snake, cls=DoctorXiongApiResponse)
     if api_response.code[0] != 200:
         return api_response.message
