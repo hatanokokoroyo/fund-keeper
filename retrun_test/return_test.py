@@ -31,7 +31,7 @@ def return_test(strategy, start_date, end_date):
         # 三年年化利率
         return_rate = calculate_return_rate(fund_code, strategy, start_date, end_date)
         total_return_rate += return_rate
-    print(' 三年平均年化利率: ' + str(total_return_rate / len(fund_code_list)))
+    print('三年平均年化利率: ' + str(total_return_rate / len(fund_code_list) / 3))
 
 
 def get_fund_code_list_for_test():
@@ -57,7 +57,6 @@ def calculate_return_rate(fund_code, strategy, start_date, end_date):
     :return:
     """
     print('============================================================')
-    total_amount = 100
     buy_amount = 100
 
     # 总盈利值
@@ -79,16 +78,16 @@ def calculate_return_rate(fund_code, strategy, start_date, end_date):
             current_buy_price = net_worth_data_list[i].net_worth
             current_buy_number = round(buy_amount / current_buy_price, 2)
             current_buy_date = net_worth_data_list[i].date
-            # print(fund_code, current_buy_date, current_buy_price)
-        elif fund_operation == FundOperation.SELL:
+            print('买入日期:', current_buy_date, '买入价格:', current_buy_price, '买入数量:', current_buy_number)
+        elif fund_operation == FundOperation.SELL and current_buy_price is not None:
             current_sell_price = net_worth_data_list[i].net_worth
             current_sell_date = net_worth_data_list[i].date
             profit = round((current_sell_price - current_buy_price) * current_buy_number, 4)
             total_profit += profit
-            # print(fund_code, current_buy_date, current_sell_date, current_buy_price, current_sell_price, profit)
-    total_amount += total_profit
-    return_rate = round(total_amount / 100, 4)
-    print(fund_code, 'return rate: ', return_rate)
+            print('卖出日期:', current_sell_date, '卖出价格:', current_sell_price, '卖出数量:', current_buy_number, '盈利:', profit)
+            current_buy_price = None
+    return_rate = round(total_profit / buy_amount, 4)
+    print(fund_code, 'total profit:', round(total_profit, 4), ', return rate:', return_rate)
     return return_rate
 
 
