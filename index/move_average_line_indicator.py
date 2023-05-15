@@ -8,5 +8,5 @@ def calculate_move_average_line(data_frame: pandas.DataFrame, time_window: int) 
     :param time_window: 时间窗口大小(日)
     :return:  data_frame include columns: MA<time_window>
     """
-    data_frame['MA' + str(time_window)] = data_frame['Net Worth'].rolling(time_window).mean()
+    data_frame['ma' + str(time_window)] = data_frame['net_worth'].rolling(time_window).mean()
     return data_frame

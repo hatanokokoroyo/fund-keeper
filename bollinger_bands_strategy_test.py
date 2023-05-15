@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 
 from api.trend.doctor_xiong_api import get_fund_detail
-from api.trend.doctor_xiong_model import DoctorXiongFundDetail
+from api.trend.doctor_xiong_model import DoctorXiongFundDetail, DoctorXiongNetWorthData
 
 
 def get_fund_real_time_net_worth(fund_code: str):
@@ -50,7 +50,7 @@ def calculate_rsi(data, period=14):
 def main():
     # start_date = '2020-05-12'
     start_date = '2021-05-12'
-    end_date = '2023-05-12'
+    end_date = '2023-05-14'
 
     fund_code_list = [
         # '016814', '004598', '012863', '001156', '400015', '012832', '017482', '006229', '013311', '001856', '010149',
@@ -60,6 +60,16 @@ def main():
         # '008702', '013081', '013219', '008591', '005918', '016814', '012810', '004598', '007882', '008087', '012769',
         # '008586', '005224', '017090', '014130', '012637', '012615', '017482', '001924', '002258', '001678', '013621',
         # '010769', '017484', '006166', '001856', '008888', '320007',
+        '012832',
+        '013311',
+        '001856',
+        '010149',
+        '011103',
+        '008702',
+        '014111',
+        '005224',
+        '017090',
+        '002258',
     ]
 
     all_return = 0
@@ -77,6 +87,7 @@ def main():
             print('error')
             return
         fund_data_list = fund_detail.get_net_worth_data_list()
+        fund_data_list.append(DoctorXiongNetWorthData([end_date, today_net_worth, '', '']))
 
         # 创建DataFrame对象，用于进行数据处理和计算
         df = pd.DataFrame([(data.date, data.net_worth) for data in fund_data_list], columns=['Date', 'Net Worth'])
@@ -118,10 +129,9 @@ def main():
         plt.plot(df.index, df['Upper Band'], label='Upper Band')
         plt.plot(df.index, df['Lower Band'], label='Lower Band')
         plt.fill_between(df.index, df['Lower Band'], df['Upper Band'], alpha=0.2)  # 填充布林带之间的区域
-
         # 计算10日移动平均线并绘制
-        df['10MA'] = df['Net Worth'].rolling(10).mean()
-        plt.plot(df.index, df['10MA'], label='10MA')
+        df['5MA'] = df['Net Worth'].rolling(5).mean()
+        plt.plot(df.index, df['5MA'], label='5MA')
 
         plt.legend(loc='upper left')
 
@@ -163,7 +173,8 @@ def main():
         # plt.axhline(y=70, color='green', linestyle='--', label='Overbought (70)')
 
         # 使用微软雅黑字体
-        plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+        # plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+        plt.rcParams['font.sans-serif'] = ['Songti SC']
         plt.show()
 
         # 历史数据回测策略

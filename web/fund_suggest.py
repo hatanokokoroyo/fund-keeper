@@ -83,6 +83,7 @@ def draw_chart(fund_name, fund_code, start_date, end_date, fund_daily_net_worth_
     print('last of date is ' + fund_daily_net_worth_list[-1].date + ', last of net worth is ' + str(
         fund_daily_net_worth_list[-1].net_worth))
     plt.figure(figsize=(15, 10))
+    # plt.rcParams['font.sans-serif'] = ['Songti SC']
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     plt.title(fund_name + ' - ' + fund_code + ' - ' + start_date + ' - ' + end_date)
