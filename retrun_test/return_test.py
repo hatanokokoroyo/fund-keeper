@@ -7,13 +7,16 @@ import requests
 from api.trend.doctor_xiong_api import get_fund_detail
 from api.trend.doctor_xiong_model import DoctorXiongNetWorthData
 from stragegy.double_move_average_line_strategy import DoubleMoveAverageLineStrategyImpl
+from stragegy.bollinger_bands_strategy import BollingerBandsStrategyImpl
 from stragegy.strategy import FundOperation
 
 
 def main():
     start_date = '2020-05-15'
+    # start_date = '2020-05-15'
     end_date = '2023-05-15'
-    strategy = DoubleMoveAverageLineStrategyImpl()
+    # strategy = DoubleMoveAverageLineStrategyImpl()
+    strategy = BollingerBandsStrategyImpl()
     return_test(strategy, start_date, end_date)
 
 
@@ -62,30 +65,41 @@ def calculate_return_rate(fund_code, strategy, start_date, end_date):
     # 总盈利值
     total_profit = 0
     # 当前买入价格
-    current_buy_price = 0
+    hold_price = 0
     # 当前持有数量
-    current_buy_number = 0
+    hold_number = 0
     # 当前买入时间
-    current_buy_date = None
+    last_buy_date = None
     # 查询基金在指定时间内的历史净值
     fund_name, net_worth_data_list = get_fund_detail2(fund_code, start_date, end_date)
     # 从第三十天开始计算
     for i in range(30, len(net_worth_data_list)):
         current_net_worth_data_list = net_worth_data_list[0:i]
         data_frame = convert_net_worth_list_to_data_frame(current_net_worth_data_list)
-        fund_operation = strategy.execute_strategy(data_frame)
+        fund_operation = strategy.execute_strategy(data_frame, hold_price=hold_price,
+                                                   hold_number=hold_number)
+
+        today_net_worth = current_net_worth_data_list[-1].net_worth
+        today = current_net_worth_data_list[-1].date
         if fund_operation == FundOperation.BUY:
-            current_buy_price = net_worth_data_list[i].net_worth
-            current_buy_number = round(buy_amount / current_buy_price, 2)
-            current_buy_date = net_worth_data_list[i].date
-            print('买入日期:', current_buy_date, '买入价格:', current_buy_price, '买入数量:', current_buy_number)
-        elif fund_operation == FundOperation.SELL and current_buy_price is not None:
-            current_sell_price = net_worth_data_list[i].net_worth
-            current_sell_date = net_worth_data_list[i].date
-            profit = round((current_sell_price - current_buy_price) * current_buy_number, 4)
+            buy_number = round(buy_amount / today_net_worth, 2)
+            hold_number += buy_number
+            if hold_number == 0:
+                hold_price = today_net_worth
+            else:
+                hold_price = round((hold_price * hold_number + today_net_worth * buy_number) / (
+                        hold_number + buy_number), 4)
+            last_buy_date = net_worth_data_list[i].date
+            print('买入日期:', last_buy_date, '买入价格:', hold_price, '买入数量:', buy_number, '持仓价格:', hold_price,
+                  '持仓数量:', hold_number)
+        elif fund_operation == FundOperation.SELL and hold_number > 0:
+            sell_price = net_worth_data_list[i].net_worth
+            profit = round((sell_price - hold_price) * hold_number, 4)
             total_profit += profit
-            print('卖出日期:', current_sell_date, '卖出价格:', current_sell_price, '卖出数量:', current_buy_number, '盈利:', profit)
+            print('卖出日期:', today, '卖出价格:', sell_price, '卖出数量:', hold_number, '持仓价格:', hold_price, '盈利:', profit)
             current_buy_price = None
+            hold_number = 0
+            last_buy_date = None
     return_rate = round(total_profit / buy_amount, 4)
     print(fund_code, 'total profit:', round(total_profit, 4), ', return rate:', return_rate)
     return return_rate
