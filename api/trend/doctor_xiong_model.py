@@ -89,3 +89,4 @@ class DoctorXiongNetWorthData(object):
         self.net_worth = float(net_worth_data_array[1])
         self.growth = net_worth_data_array[2]
         self.dividend = net_worth_data_array[3]
+        self.operation = None

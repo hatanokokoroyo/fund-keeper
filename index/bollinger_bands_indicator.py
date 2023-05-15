@@ -2,7 +2,7 @@ import pandas
 
 
 def calculate_bollinger_bands(data_frame: pandas.DataFrame, time_window: int = 20,
-                              std_diff_multiple: int = 2) -> pandas.DataFrame:
+                              std_diff_multiple: float = 2) -> pandas.DataFrame:
     """
     计算布林带指标
     :param data_frame: | 日期 | 净值 |
