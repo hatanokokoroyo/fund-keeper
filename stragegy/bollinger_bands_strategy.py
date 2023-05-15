@@ -26,9 +26,9 @@ class BollingerBandsStrategyImpl(FundStrategy):
         if yesterday_net_worth >= lower_band > today_net_worth:
             return FundOperation.BUY
 
-        # 如果已经持有仓位, 并且今日净值低于买入价格的95%, 则卖出
-        if buy_price is not None and today_net_worth < buy_price * 0.95:
-            return FundOperation.SELL
+        # # 如果已经持有仓位, 并且今日净值低于买入价格的95%, 则卖出
+        # if buy_price is not None and today_net_worth < buy_price * 0.95:
+        #     return FundOperation.SELL
 
         # # 如果已经持有仓位, 并且今日净值高于买入价格的105%, 则卖出
         # if buy_price is not None and today_net_worth > buy_price * 1.05:

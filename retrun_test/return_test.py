@@ -83,12 +83,13 @@ def calculate_return_rate(fund_code, strategy, start_date, end_date):
         today = current_net_worth_data_list[-1].date
         if fund_operation == FundOperation.BUY:
             buy_number = round(buy_amount / today_net_worth, 2)
-            hold_number += buy_number
             if hold_number == 0:
                 hold_price = today_net_worth
             else:
-                hold_price = round((hold_price * hold_number + today_net_worth * buy_number) / (
-                        hold_number + buy_number), 4)
+                hold_price = round(
+                    (hold_price * hold_number + today_net_worth * buy_number) / (hold_number + buy_number), 4
+                )
+            hold_number += buy_number
             last_buy_date = net_worth_data_list[i].date
             print('买入日期:', last_buy_date, '买入价格:', hold_price, '买入数量:', buy_number, '持仓价格:', hold_price,
                   '持仓数量:', hold_number)
