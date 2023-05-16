@@ -195,6 +195,7 @@ def show_chart(net_worth_data_list: list, fund_code, fund_name, return_rate):
     data_frame = calculate_move_average_line(data_frame, 20)
 
     plt.plot(data_frame['date'], data_frame['upper_band'], color='red', label='upper band')
+    plt.plot(data_frame['date'], data_frame['middle_band'], color='pink', label='middle band')
     plt.plot(data_frame['date'], data_frame['lower_band'], color='green', label='lower band')
     plt.fill_between(data_frame.index, data_frame['lower_band'], data_frame['upper_band'], alpha=0.2)  # 填充布林带之间的区域
 

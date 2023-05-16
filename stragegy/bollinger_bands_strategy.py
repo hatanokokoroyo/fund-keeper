@@ -27,6 +27,7 @@ class BollingerBandsStrategyImpl(FundStrategy):
         today_net_worth = data_frame['net_worth'].iloc[-1]
 
         lower_band = data_frame['lower_band'].iloc[-1]
+        middle_band = data_frame['middle_band'].iloc[-1]
         upper_band = data_frame['upper_band'].iloc[-1]
 
         hold_price = kwargs.get('hold_price', None)
