@@ -1,8 +1,14 @@
 import json
 import re
+from json import JSONEncoder
 
 camel_pat = re.compile(r'([A-Z])')
 under_pat = re.compile(r'_([a-z])')
+
+
+class DefaultEncoder(JSONEncoder):
+    def default(self, o):
+        return o.__dict__
 
 
 def loads(json_str: str, formatter=None, cls=None):
@@ -16,7 +22,7 @@ def loads(json_str: str, formatter=None, cls=None):
 
 
 def dumps(obj, formatter=None):
-    json_str = json.dumps(obj.__dict__, ensure_ascii=False, indent=4)
+    json_str = json.dumps(obj.__dict__, ensure_ascii=False, indent=4, cls=DefaultEncoder)
     if formatter is not None:
         json_str = formatter(json_str)
     return json_str
