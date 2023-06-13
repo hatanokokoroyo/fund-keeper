@@ -1,31 +1,14 @@
 import datetime
-import requests
 import json
-from utils.json_utils import dumps, loads
+from typing import List
+from model import NetWorth, Stock
+from file_utils import check_file_exists, save_to_file
+
+import requests
 
 headers = {
     "token": "UPIYr4zGtH"
 }
-
-
-class Stock(object):
-    def __init__(self, **kwargs):
-        self.name: str = kwargs.get('name')
-        self.code: str = kwargs.get('code')
-        self.time_net_worth_list: list[NetWorth] = kwargs.get('time_net_worth_list', None)
-        self.daily_net_worth_list: list[NetWorth] = kwargs.get('daily_net_worth_list', None)
-        self.week_net_worth_list: list[NetWorth] = kwargs.get('week_net_worth_list', None)
-
-
-class NetWorth(object):
-    def __init__(self, **kwargs):
-        self.open: float = float(kwargs.get('open'))
-        self.close: float = float(kwargs.get('close'))
-        self.high: float = float(kwargs.get('high'))
-        self.low: float = float(kwargs.get('low'))
-        self.volume: float = float(kwargs.get('volume'))
-        # %Y-%m-%d
-        self.date: str = kwargs.get('date')
 
 
 def get_all_stock_name_code():
@@ -44,7 +27,7 @@ def get_all_stock_name_code():
     return code_name_dict_list
 
 
-def get_stock_daily_net_worth(stock_code: str) -> list[NetWorth]:
+def get_stock_daily_net_worth(stock_code: str) -> List[NetWorth]:
     url = 'https://api.doctorxiong.club/v1/stock/kline/day'
     end_date = datetime.datetime.now().strftime('%Y-%m-%d')
     one_year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
@@ -66,26 +49,6 @@ def get_stock_daily_net_worth(stock_code: str) -> list[NetWorth]:
     return stock_net_worth_list
 
 
-def save_to_file(stock: Stock):
-    with open('./stock/' + stock.code + '.json', 'w+', encoding='utf8') as f:
-        f.write(dumps(stock))
-
-
-def load_from_file(stock_code: str) -> Stock:
-    with open('./stock/' + stock_code + '.json', 'r', encoding='utf8') as f:
-        return loads(f.read(), cls=Stock)
-
-
-def check_file_exists(stock_code: str) -> bool:
-    try:
-        file_path = './stock/' + stock_code + '.json'
-        with open(file_path, 'r', encoding='utf8') as f:
-            f.read()
-        return True
-    except:
-        return False
-
-
 def main():
     stock_name_code_list = get_all_stock_name_code()
     total = len(stock_name_code_list)
@@ -104,6 +67,7 @@ def main():
         except Exception as e:
             print('请求失败：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name)
             print(e)
+            continue
         print('请求成功：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name)
 
 
