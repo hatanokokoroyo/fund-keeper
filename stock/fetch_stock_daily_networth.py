@@ -27,6 +27,19 @@ def get_all_stock_name_code():
     return code_name_dict_list
 
 
+def get_stock_base_info(stock_code: str) -> (bool, dict):
+    url = 'https://api.doctorxiong.club/v1/stock'
+    params = {
+        'code': stock_code
+    }
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code != 200:
+        return False, {}
+    if len(json.loads(response.text)['data']) == 0:
+        return False, {}
+    return True, json.loads(response.text)['data'][0]
+
+
 def get_stock_daily_net_worth(stock_code: str) -> List[NetWorth]:
     url = 'https://api.doctorxiong.club/v1/stock/kline/day'
     end_date = datetime.datetime.now().strftime('%Y-%m-%d')
@@ -55,11 +68,26 @@ def main():
     count = 0
     for stock_name_code in stock_name_code_list:
         count += 1
-        code = stock_name_code['code']
-        name = stock_name_code['name']
+        code: str = stock_name_code['code']
+        name: str = stock_name_code['name']
+        # 过滤掉本地已经存在的股票
         if check_file_exists(code):
-            print('数据存在存在：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name)
+            print('数据存在：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name)
             continue
+        # 过滤掉ST的股票
+        if name.startswith('st'):
+            print('ST股票, 已过滤：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name)
+            continue
+        # 过滤掉PE小于等于0的股票
+        success_flag, base_info = get_stock_base_info(code)
+        if success_flag:
+            try:
+                if float(base_info['pe']) <= 0:
+                    print('PE小于等于0, 已过滤：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name)
+                    continue
+            except Exception as e:
+                print('PE解析失败, 已过滤：' + str(count) + '/' + str(total) + ' ' + code + ' ' + name, base_info['pe'], e)
+                continue
         try:
             daily_net_worth_list = get_stock_daily_net_worth(code)
             stock = Stock(name=name, code=code, daily_net_worth_list=daily_net_worth_list)
