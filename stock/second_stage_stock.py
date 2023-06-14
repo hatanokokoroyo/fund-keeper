@@ -20,7 +20,7 @@ def get_local_stock_list():
 
 def match_second_stage(data_frame: pandas.DataFrame, last_index) -> bool:
     # 当前收盘价 > 50日均线 > 150日均线 > 200日均线
-    # 200日均线 > 30天前的200日均线
+    # 200日均线连续上涨20日
     # 当前收盘价 >= 最近一年最低收盘价的1.3倍
     # 当前收盘价 <= 最近一年最高收盘价的0.75倍
     today_close = data_frame.iloc[last_index]['close']
@@ -33,12 +33,15 @@ def match_second_stage(data_frame: pandas.DataFrame, last_index) -> bool:
 
     if not today_close > today_ma50 > today_ma150 > today_ma200:
         return False
-
-    if not year_low_close * 1.3 <= today_close <= year_high_close * 0.75:
+    # 大于一年内最低收盘价的1.3倍
+    if not year_low_close * 1.3 <= today_close:
+        return False
+    # 大于一年内最高收盘价的0.75倍
+    if not today_close >= year_high_close * 0.75:
         return False
     # 200日均线连续上涨20日
     for i in range(1, 20):
-        if data_frame.iloc[last_index - i]['ma200'] > data_frame.iloc[last_index - i - 1]['ma200']:
+        if data_frame.iloc[last_index - i]['ma200'] < data_frame.iloc[last_index - i - 1]['ma200']:
             return False
     return True
 
@@ -79,9 +82,9 @@ def main():
         try:
             # convert to dataFrame
             data_frame = pd.DataFrame(
-                [(f['open'], f['close'], f['high'], f['low'], convert_datetime_str_to_datetime(f['date'])) for f in
+                [(f['open'], f['close'], f['high'], f['low'], f['volume'], convert_datetime_str_to_datetime(f['date'])) for f in
                  daily_net_worth_list],
-                columns=['open', 'close', 'high', 'low', 'date'])
+                columns=['open', 'close', 'high', 'low',  'volume', 'date'])
             # calculate 50,150,200 move average line
             data_frame['net_worth'] = data_frame['close']
             data_frame = calculate_move_average_line(data_frame, 50)
@@ -90,6 +93,28 @@ def main():
 
             is_second_flag = match_second_stage(data_frame, -1)
             if not is_second_flag:
+                continue
+            # 额外过滤条件: 5日均线大于10日均线大于20日均线
+            data_frame = calculate_move_average_line(data_frame, 5)
+            data_frame = calculate_move_average_line(data_frame, 10)
+            data_frame = calculate_move_average_line(data_frame, 20)
+            if not data_frame.iloc[-1]['ma5'] > data_frame.iloc[-1]['ma10'] > data_frame.iloc[-1]['ma20']:
+                continue
+            # 5, 10, 20均线, 今日大于昨日
+            if not data_frame.iloc[-1]['ma5'] > data_frame.iloc[-2]['ma5'] \
+                    and data_frame.iloc[-1]['ma10'] > data_frame.iloc[-2]['ma10'] \
+                    and data_frame.iloc[-1]['ma20'] > data_frame.iloc[-2]['ma20']:
+                continue
+            # 今日交易量, 必须大于昨日交易量的2倍
+            if not data_frame.iloc[-1]['volume'] > data_frame.iloc[-2]['volume'] * 1.5:
+                continue
+            # 最近20日内, 价格均高于50日均线
+            over_ma50_20day_flag = True
+            for i in range(1, 10):
+                if data_frame.iloc[-i]['close'] < data_frame.iloc[-i]['ma50']:
+                    over_ma50_20day_flag = False
+                    break
+            if not over_ma50_20day_flag:
                 continue
             second_stage_start_date = get_second_stage_start_date(data_frame)
             second_stage_stock_list.append((stock_code, stock.name, second_stage_start_date))
