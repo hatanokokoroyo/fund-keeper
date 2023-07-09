@@ -16,8 +16,8 @@ headers = {
 }
 
 sched = BlockingScheduler()
-# 已经发送过的消息, 避免重复发送
-sent_msg = []
+# 交易量增长过滤器, 防止频繁发送消息 {stock_code: volume_growth_rate(round 1)}
+filter_map = {}
 
 feishu_bot_hook = 'https://open.feishu.cn/open-apis/bot/v2/hook/028ecc42-3e01-45af-b358-a0446e3c4264'
 
@@ -62,9 +62,6 @@ def get_stock_daily_net_worth(stock_code: str) -> List[NetWorth]:
 
 
 def send_msg(msg):
-    if msg in sent_msg:
-        return
-    sent_msg.append(msg)
     # 发送消息
     data = {
         "msg_type": "text",
@@ -80,6 +77,7 @@ def timed_job():
     print('开始执行定时任务')
     stock_info_list = read_monitor_file()
     sent_msg_flag = False
+    need_send_msg_list = []
     for stock_code, stock_name, stock_type in stock_info_list:
         daily_net_worth_list: List[NetWorth] = get_stock_daily_net_worth(stock_code)
         # 判断最后一条数据的交易是否是倒数第二条数据的交易量的1.5倍, 保留1位小数
@@ -89,6 +87,16 @@ def timed_job():
         if volume_growth_rate < 1.5:
             print(f'{stock_name}({stock_code})交易量增长{volume_growth_rate}倍, 不关注')
             continue
+        # 如果已经在过滤器中
+        sent_volume_growth_rate = filter_map.get(stock_code)
+        if sent_volume_growth_rate is not None:
+            if sent_volume_growth_rate == volume_growth_rate:
+                print(f'{stock_name}({stock_code})交易量增长{volume_growth_rate}倍, 已经发送过消息, 不再发送')
+                continue
+            else:
+                filter_map[stock_code] = volume_growth_rate
+        else:
+            filter_map[stock_code] = volume_growth_rate
         # 大于2后就考虑是否买入
         # if volume_growth_rate > 3:
         #     print(f'{stock_name}({stock_code})交易量增长{volume_growth_rate}倍, 可以考虑买入')
@@ -103,13 +111,17 @@ def timed_job():
 
         msg = f'{stock_name}({stock_code}-{stock_type})今日涨幅{today_net_worth_growth_rate}%, ' \
               f'振幅{today_net_worth_amplitude_rate}%, 交易量增长{volume_growth_rate}倍'
-        send_msg(msg)
+        need_send_msg_list.append(msg)
         sent_msg_flag = True
         print(msg)
     print('-------------------')
-    if sent_msg_flag:
-        send_msg('-----------' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '-----------')
+    if len(need_send_msg_list) > 0:
+        merge_msg = '-----------' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '----------- \n' + \
+                    '\n'.join(need_send_msg_list)
+        send_msg(merge_msg)
 
 
 if __name__ == '__main__':
-    sched.start()
+    timed_job()
+    timed_job()
+    # sched.start()

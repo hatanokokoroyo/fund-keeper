@@ -24,16 +24,20 @@ def match_second_stage(data_frame: pandas.DataFrame, last_index) -> bool:
     year_high_close = data_frame['close'].max()
 
     if not (today_close > today_ma50 > today_ma150 > today_ma200):
+        # print('ma50, ma150, ma200 not match')
         return False
     # 大于一年内最低收盘价的1.3倍
     if not year_low_close * 1.3 <= today_close:
+        # print('year_low_close not match')
         return False
     # 大于一年内最高收盘价的0.75倍
     if not today_close >= year_high_close * 0.75:
+        # print('year_high_close not match')
         return False
     # 200日均线连续上涨20日
     for i in range(1, 20):
         if data_frame.iloc[last_index - i]['ma200'] < data_frame.iloc[last_index - i - 1]['ma200']:
+            # print('ma200 not match')
             return False
     return True
 
@@ -99,6 +103,7 @@ def get_max_growth_rate(daily_net_worth_list: List[NetWorth], start_date: dateti
             min_close = net_worth['close']
             min_date = current_datetime
     if max_close is None or min_close is None or min_close == 0 or max_close == 0 or min_close == max_close:
+
         return 0, None, None
     return (max_close - min_close) / min_close, \
         datetime.datetime.strftime(min_date, '%Y-%m-%d'), \
@@ -109,6 +114,7 @@ def main():
     second_stage_stock_list = []
 
     stock_code_list = get_local_stock_list()
+    # stock_code_list = ['']
     total_stock_count = len(stock_code_list)
     cnt = 0
     for stock_code in stock_code_list:
@@ -124,7 +130,7 @@ def main():
         # 获取半年内的最大增长率
         max_growth_rate, min_date, max_date = get_max_growth_rate(
             daily_net_worth_list, datetime.datetime.now() - datetime.timedelta(days=180), datetime.datetime.now())
-        if max_growth_rate < 1.5:
+        if max_growth_rate < 0.75:
             # print(stock_code, stock.name, '半年内增长率不足: ' + str(max_growth_rate))
             continue
 
@@ -186,7 +192,7 @@ def main():
 
     second_stage_stock_list.sort(key=lambda x: x[2], reverse=True)
     for stock_code, stock_name, second_stage_start_date, max_growth_rate in second_stage_stock_list:
-        print(stock_code, stock_name, second_stage_start_date, max_growth_rate)
+        print(stock_code, stock_name, second_stage_start_date, round(max_growth_rate, 2))
 
 
 if __name__ == '__main__':
