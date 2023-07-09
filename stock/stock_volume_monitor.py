@@ -75,11 +75,12 @@ def send_msg(msg):
     requests.post(feishu_bot_hook, json=data)
 
 
-@sched.scheduled_job('interval', seconds=30)
+@sched.scheduled_job('interval', seconds=60)
 def timed_job():
     print('开始执行定时任务')
     stock_info_list = read_monitor_file()
-    for stock_code, stock_name, type in stock_info_list:
+    sent_msg_flag = False
+    for stock_code, stock_name, stock_type in stock_info_list:
         daily_net_worth_list: List[NetWorth] = get_stock_daily_net_worth(stock_code)
         # 判断最后一条数据的交易是否是倒数第二条数据的交易量的1.5倍, 保留1位小数
         volume_growth_rate = round((daily_net_worth_list[-1].volume / daily_net_worth_list[-2].volume), 1)
@@ -100,9 +101,14 @@ def timed_job():
         # 今日振幅: (今日收盘价 / 今日开盘价)
         today_net_worth_amplitude_rate = round((today_close - today_open) / today_open * 100, 2)
 
-        msg = f'{stock_name}({stock_code})今日涨幅{today_net_worth_growth_rate}%, ' \
+        msg = f'{stock_name}({stock_code}-{stock_type})今日涨幅{today_net_worth_growth_rate}%, ' \
               f'振幅{today_net_worth_amplitude_rate}%, 交易量增长{volume_growth_rate}倍'
         send_msg(msg)
+        sent_msg_flag = True
+        print(msg)
+    print('-------------------')
+    if sent_msg_flag:
+        send_msg('-----------' + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '-----------')
 
 
 if __name__ == '__main__':
