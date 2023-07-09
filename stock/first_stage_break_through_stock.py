@@ -19,7 +19,7 @@ def match_first_stage_break_through(data_frame):
     match_date_list: List[str] = []
     # 从第30条数据开始算起
     index = 190
-    match_range = 15
+    match_range = 10
     while index < len(one_year_data) - match_range:
         index += 1
         current_data = one_year_data.iloc[index]
@@ -27,7 +27,9 @@ def match_first_stage_break_through(data_frame):
         current_close = current_data['close']
         if not (current_close > current_data['ma50'] > current_data['ma150'] > current_data['ma200']):
             continue
-        if not (current_ma200 * 1.1 < current_close < current_ma200 * 1.3):
+        # 必须在200日线上方一定区间内
+        # if not (current_ma200 * 1.1 < current_close < current_ma200 * 1.5):
+        if not (current_ma200 * 1.1 < current_close):
             continue
         # ma200已经连续上涨20日
         ma200_up_20_days_flag = True

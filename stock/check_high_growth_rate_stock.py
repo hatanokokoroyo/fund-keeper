@@ -50,7 +50,7 @@ def main():
         # 最高的日期在一个月内
         if max_growth_rate > 3 and (end_date - datetime.datetime.strptime(max_date, '%Y-%m-%d')).days < 30:
             continue
-        if max_growth_rate > 2:
+        if max_growth_rate > 3:
             matched_stock_list.append({
                 'code': stock_code,
                 'name': stock.name,

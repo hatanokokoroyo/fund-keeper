@@ -77,9 +77,9 @@ def get_stock_daily_net_worth(stock_code: str) -> List[NetWorth]:
 
 def main():
     # 删除./stock文件夹下的所有文件
-    file_list = os.listdir('./stock/')
-    for file_name in file_list:
-        os.remove('./stock/' + file_name)
+    # file_list = os.listdir('./stock/')
+    # for file_name in file_list:
+    #     os.remove('./stock/' + file_name)
     stock_name_code_list = get_all_stock_name_code()
     if stock_name_code_list is None:
         print('获取股票列表失败')

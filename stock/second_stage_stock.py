@@ -23,7 +23,7 @@ def match_second_stage(data_frame: pandas.DataFrame, last_index) -> bool:
     year_low_close = data_frame['close'].min()
     year_high_close = data_frame['close'].max()
 
-    if not today_close > today_ma50 > today_ma150 > today_ma200:
+    if not (today_close > today_ma50 > today_ma150 > today_ma200):
         return False
     # 大于一年内最低收盘价的1.3倍
     if not year_low_close * 1.3 <= today_close:
