@@ -123,5 +123,4 @@ def timed_job():
 
 if __name__ == '__main__':
     timed_job()
-    timed_job()
-    # sched.start()
+    sched.start()
