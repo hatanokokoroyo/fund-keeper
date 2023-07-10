@@ -76,7 +76,6 @@ def send_msg(msg):
 def timed_job():
     print('开始执行定时任务')
     stock_info_list = read_monitor_file()
-    sent_msg_flag = False
     need_send_msg_list = []
     for stock_code, stock_name, stock_type in stock_info_list:
         daily_net_worth_list: List[NetWorth] = get_stock_daily_net_worth(stock_code)
@@ -84,7 +83,7 @@ def timed_job():
         volume_growth_rate = round((daily_net_worth_list[-1].volume / daily_net_worth_list[-2].volume), 1)
 
         # 小于1.5的无需关注, 大于1.5后, 进入关注范围
-        if volume_growth_rate < 1.5:
+        if volume_growth_rate < 1.8:
             print(f'{stock_name}({stock_code})交易量增长{volume_growth_rate}倍, 不关注')
             continue
         # 如果已经在过滤器中
@@ -112,7 +111,6 @@ def timed_job():
         msg = f'{stock_name}({stock_code}-{stock_type})今日涨幅{today_net_worth_growth_rate}%, ' \
               f'振幅{today_net_worth_amplitude_rate}%, 交易量增长{volume_growth_rate}倍'
         need_send_msg_list.append(msg)
-        sent_msg_flag = True
         print(msg)
     print('-------------------')
     if len(need_send_msg_list) > 0:
@@ -123,4 +121,5 @@ def timed_job():
 
 if __name__ == '__main__':
     timed_job()
-    sched.start()
+    # timed_job()
+    # sched.start()

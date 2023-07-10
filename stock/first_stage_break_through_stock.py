@@ -90,8 +90,8 @@ def main():
         cnt += 1
         stock: Stock = load_from_file(stock_code)
         daily_net_worth_list = stock.daily_net_worth_list
-        # 300开头的股票, 一般是创业板, 不考虑
-        if stock_code[2:5] == '300':
+        # 过滤掉科创板和创业板, 300, 301, 688
+        if stock_code[2:5] == '300' or stock_code[2:5] == '301' or stock_code[2:5] == '688':
             continue
         if len(daily_net_worth_list) < 200:
             # print(stock_code, stock.name, '数据不足: ' + str(len(daily_net_worth_list)))
