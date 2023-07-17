@@ -83,7 +83,7 @@ def timed_job():
         volume_growth_rate = round((daily_net_worth_list[-1].volume / daily_net_worth_list[-2].volume), 1)
 
         # 小于1.5的无需关注, 大于1.5后, 进入关注范围
-        if volume_growth_rate < 1.8:
+        if volume_growth_rate < 1.5:
             print(f'{stock_name}({stock_code})交易量增长{volume_growth_rate}倍, 不关注')
             continue
         # 如果已经在过滤器中
@@ -121,5 +121,4 @@ def timed_job():
 
 if __name__ == '__main__':
     timed_job()
-    # timed_job()
-    # sched.start()
+    sched.start()

@@ -25,11 +25,11 @@ def match_first_stage_break_through(data_frame):
         current_data = one_year_data.iloc[index]
         current_ma200 = current_data['ma200']
         current_close = current_data['close']
-        if not (current_close > current_data['ma50'] > current_data['ma150'] > current_data['ma200']):
+        if not (current_close > current_data['ma50'] > current_data['ma200']):
             continue
         # 必须在200日线上方一定区间内
         # if not (current_ma200 * 1.1 < current_close < current_ma200 * 1.5):
-        if not (current_ma200 * 1.1 < current_close):
+        if not (current_ma200 * 0.8 < current_close < current_ma200 * 1.5):
             continue
         # ma200已经连续上涨20日
         ma200_up_20_days_flag = True
@@ -122,6 +122,8 @@ def main():
             continue
 
         print(stock_code, stock.name, 'done', cnt, '/', total_stock_count, match_date_list)
+    # 根据match_date_list中最后一个日期, 进行倒叙排序
+    first_stage_break_through_stock_list.sort(key=lambda x: x[2][-1], reverse=True)
     for stock_code, stock_name, match_date_list in first_stage_break_through_stock_list:
         # 如果match_date_list中, 有日期在两个月内, 则打印
         for match_date in match_date_list:
