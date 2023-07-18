@@ -53,7 +53,7 @@ def get_stock_base_info(stock_code: str) -> (bool, dict):
 def get_stock_daily_net_worth(stock_code: str) -> List[NetWorth]:
     url = 'https://api.doctorxiong.club/v1/stock/kline/day'
     end_date = datetime.datetime.now().strftime('%Y-%m-%d')
-    one_year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
+    one_year_ago = (datetime.datetime.now() - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
     params = {
         'code': stock_code,
         'startDate': one_year_ago,
