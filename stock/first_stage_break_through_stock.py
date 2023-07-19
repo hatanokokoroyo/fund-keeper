@@ -25,19 +25,10 @@ def match_first_stage_break_through(data_frame):
         current_data = one_year_data.iloc[index]
         current_ma200 = current_data['ma200']
         current_close = current_data['close']
-        if not (current_close > current_data['ma50'] > current_data['ma200']):
-            continue
-        # 必须在200日线上方一定区间内
+        # 必须在200日线附近一定区间内
         # if not (current_ma200 * 1.1 < current_close < current_ma200 * 1.5):
-        if not (current_ma200 * 0.8 < current_close < current_ma200 * 1.5):
-            continue
-        # ma200已经连续上涨20日
-        ma200_up_20_days_flag = True
-        for i in range(1, 20):
-            if one_year_data.iloc[index - i]['ma200'] < one_year_data.iloc[index - i - 1]['ma200']:
-                ma200_up_20_days_flag = False
-                break
-        if not ma200_up_20_days_flag:
+        if not (current_ma200 * 0.9 < current_close < current_ma200 * 1.2):
+            # print('不在200日线附近区间内', current_data['date'], current_ma200, current_close)
             continue
         # 取指定范围条数据收盘价的均值, 指定范围条数据的收盘价, 都在均价的0.9倍到1.1倍之间, 且都在ma50之上
         match_flag = True
@@ -60,22 +51,24 @@ def match_first_stage_break_through(data_frame):
         if avg_close_of_last_30_days > avg_close_of_after_match_range_days:
             continue
         # 前150日至少有三分之一在ma200以下
-        ma200_below_count = 0
-        for i in range(150):
-            if one_year_data.iloc[index - i]['close'] < one_year_data.iloc[index - i]['ma200']:
-                ma200_below_count += 1
-        if ma200_below_count < 50:
-            continue
+        # ma200_below_count = 0
+        # for i in range(150):
+        #     if one_year_data.iloc[index - i]['close'] < one_year_data.iloc[index - i]['ma200']:
+        #         ma200_below_count += 1
+        # if ma200_below_count < 50:
+        #     continue
         # 数据向前30日, 如果有任意一天收盘价低于ma200, 则符合条件
-        break_through_flag = False
-        for i in range(30):
-            if one_year_data.iloc[index - i]['close'] < one_year_data.iloc[index - i]['ma200']:
-                break_through_flag = True
-                break
-        if match_flag and break_through_flag:
+        # break_through_flag = False
+        # for i in range(30):
+        #     if one_year_data.iloc[index - i]['close'] < one_year_data.iloc[index - i]['ma200']:
+        #         break_through_flag = True
+        #         break
+        # if match_flag and break_through_flag:
+        #     match_date_list.append(datetime.datetime.strftime(current_data['date'], '%Y-%m-%d'))
+        #     # 接下来30日的数据不需要进行扫描了
+        #     index += 15
+        if match_flag:
             match_date_list.append(datetime.datetime.strftime(current_data['date'], '%Y-%m-%d'))
-            # 接下来30日的数据不需要进行扫描了
-            index += 15
     return match_date_list
 
 
@@ -83,7 +76,7 @@ def main():
     first_stage_break_through_stock_list = []
 
     stock_code_list = get_local_stock_list()
-    # stock_code_list = ['sh605011']
+    # stock_code_list = ['sh600218']
     total_stock_count = len(stock_code_list)
     cnt = 0
     for stock_code in stock_code_list:
@@ -126,10 +119,11 @@ def main():
     first_stage_break_through_stock_list.sort(key=lambda x: x[2][-1], reverse=True)
     for stock_code, stock_name, match_date_list in first_stage_break_through_stock_list:
         # 如果match_date_list中, 有日期在两个月内, 则打印
-        for match_date in match_date_list:
-            if datetime.datetime.strptime(match_date, '%Y-%m-%d') > datetime.datetime.now() - datetime.timedelta(
-                    days=60):
-                print(stock_code, stock_name, match_date_list)
+        last_date = match_date_list[-1]
+        if datetime.datetime.strptime(last_date, '%Y-%m-%d') > datetime.datetime.now() - datetime.timedelta(
+                days=15):
+            # print(stock_code, stock_name, last_date)
+            print('{},{},SIDEWAYS,{}'.format(stock_code, stock_name, last_date))
 
 
 if __name__ == '__main__':

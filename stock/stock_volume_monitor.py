@@ -39,7 +39,7 @@ def read_monitor_file():
             line = line.strip()
             if line.startswith('#'):
                 continue
-            stock_code, stock_name, stock_type = line.split(',')
+            stock_code, stock_name, stock_type, start_monitor_date = line.split(',')
             stock_info_list.append((stock_code, stock_name, stock_type))
     return stock_info_list
 
@@ -103,7 +103,7 @@ def convert_datetime_str_to_datetime(date_time_str: str) -> datetime.datetime:
     return datetime.datetime.strptime(date_time_str, '%Y-%m-%d')
 
 
-@sched.scheduled_job('interval', seconds=60)
+@sched.scheduled_job('interval', seconds=240)
 def timed_job():
     # 判断是否在开盘时间段
     now = datetime.datetime.now()
@@ -134,7 +134,7 @@ def timed_job():
             need_send_msg_list.append(msg)
 
         # 小于1.5的无需关注, 大于1.5后, 进入关注范围
-        if volume_growth_rate < 1.5:
+        if volume_growth_rate < 2:
             print(f'{stock_name}({stock_code})交易量增长{volume_growth_rate}倍, 不关注')
             continue
         # 如果已经在过滤器中
